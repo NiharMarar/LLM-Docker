@@ -1,0 +1,21 @@
+services:
+  webui:
+    image: ghcr.io/ai-dock/stable-diffusion-webui:latest-cpu  # Intel iGPU => CPU build
+    container_name: stable-diffusion
+    ports:
+      - "17860:17860"   # host:container; we bind the app to 17860 and expose it directly
+    volumes:
+      - ./models:/data/models
+      - ./outputs:/data/outputs
+      - ./workspace:/data/workspace
+    environment:
+      # Start ONLY the webui, skip caddy/cloudflared/jupyter/syncthing noise
+      - SUPERVISOR_NO_AUTOSTART=caddy,cloudflared,serviceportal,jupyter,syncthing
+
+      # Make the app bind exactly once to 17860 and not auto-download models
+      - PORT=17860
+      - WEBUI_ARGS=--listen --medvram --no-half --no-download-sd-model --ckpt /data/models/Stable-diffusion/ponyDiffusionV6XL_v6StartWithThisOne.safetensors
+
+      - TZ=America/Los_Angeles
+      - CF_QUICK_TUNNEL=false
+    restart: unless-stopped

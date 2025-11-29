@@ -1,0 +1,16 @@
+services:
+  webui:
+    image: ghcr.io/ai-dock/stable-diffusion-webui:latest-cpu
+    container_name: stable-diffusion
+    ports:
+      - "7860:17860"   # host -> container
+    volumes:
+      - ./models:/data/models
+      - ./outputs:/data/outputs
+      - ./workspace:/data/workspace
+    environment:
+      - SUPERVISOR_NO_AUTOSTART=caddy,cloudflared,serviceportal,jupyter,syncthing
+      - WEBUI_ARGS=--listen --port 17860 --lowvram --medvram --no-half --max-batch-count 1 --ckpt-dir /data/models/Stable-diffusion
+      - TZ=America/Los_Angeles
+      - CF_QUICK_TUNNEL=false
+    restart: unless-stopped
